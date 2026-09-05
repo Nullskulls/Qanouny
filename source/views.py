@@ -25,9 +25,23 @@ class RenderTemplate:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "Testing Wipey"
+                        "text": "Welcome to the Wipey Bot where you can easily delete your messages with a single command!"
                     }
+                },
+                {
+                    "type": "input",
+                    "element": {
+                        "type": "plain_text_input",
+                        "action_id": "plain_text_input-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "App Token",
+                        # "emoji": True
+                    },
+                    # "optional": False
                 }
             ]
         }
+        
         return view
