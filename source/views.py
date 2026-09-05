@@ -1,4 +1,5 @@
-import logging
+import logging, json
+from helpers import get_manifest
 
 logger = logging.getLogger(__name__)
 
@@ -6,6 +7,7 @@ class RenderTemplate:
 
     def __init__(self, client):
         self.client = client
+        self.wiped_bot_manifest = get_manifest("wiped")
 
     def render_view(self, event, view):
         print(f"Rendering view for user: {event['user']}")
@@ -40,7 +42,14 @@ class RenderTemplate:
                         # "emoji": True
                     },
                     # "optional": False
-                }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*App Manifest*\n```{json.dumps(self.wiped_bot_manifest, indent=4)}```"
+                    }
+                },
             ]
         }
         
