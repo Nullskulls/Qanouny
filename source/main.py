@@ -30,7 +30,27 @@ app = App(
 def wipe_command(ack, body):
     ack()
 
-
+@app.event("app_home_opened")
+def home_tab(client, event, logger):
+    print(f"Home tab opened for user: {event['user']}")
+    try:
+        client.views_publish(
+            user_id=event["user"],
+            view={
+                "type": "home",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "Testing Wipey"
+                        }
+                    }
+                ]
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error publishing home tab: {e}")
 
 if __name__ == "__main__":
     socket_mode_handler = SocketModeHandler(app=app, app_token=SLACK_APP_TOKEN)
