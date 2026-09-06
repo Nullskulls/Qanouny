@@ -37,7 +37,19 @@ def wipe_command(ack, body):
 def home_tab(client, event, logger):
     render_template.render_view(event, render_template.render_home_tab())
 
+@app.action("submit_token")
+def handle_submit(ack, body):
+    ack()
 
+    user_id = body["user"]["id"]
+
+    print(body)
+
+    token = (
+        body["view"]["state"]["values"]["token_input"]["plain_text_input-action"]["value"]
+    )
+
+    print(f"User {user_id} submitted token: {token}")
 
 if __name__ == "__main__":
     socket_mode_handler = SocketModeHandler(app=app, app_token=SLACK_APP_TOKEN)

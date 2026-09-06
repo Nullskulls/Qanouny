@@ -1,4 +1,5 @@
 import logging, json
+
 from helpers import get_manifest
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ class RenderTemplate:
                 },
                 {
                     "type": "input",
+                    "block_id": "token_input",
                     "element": {
                         "type": "plain_text_input",
                         "action_id": "plain_text_input-action"
@@ -39,9 +41,21 @@ class RenderTemplate:
                     "label": {
                         "type": "plain_text",
                         "text": "App Token",
-                        # "emoji": True
                     },
-                    # "optional": False
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Submit Token",
+                            },
+                            "value": "click_me_123",
+                            "action_id": "submit_token"
+                        }
+                    ]
                 },
                 {
                     "type": "section",
