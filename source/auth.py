@@ -1,29 +1,30 @@
-import os
-from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
-from dotenv import load_dotenv
+import base64, os
+
 from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
-load_dotenv()
-key = Fernet.generate_key()
-f = Fernet(key)
 
-token = input("Enter your Slack Bot Token: ")
+SALT_BYTES = 16
 
-encrypted_token = f.encrypt(bytes(token, 'utf-8'))
+class Encrypter:
+    def __init__(self, n=2**18, r=8, p=1):
+        self.n = n
+        self.r = r
+        self.p = p
 
-decrypted_token = f.decrypt(encrypted_token)
+    def generate_key(self, password, salt):
+        kdf = Scrypt(salt=salt, length=32, n=self.n, r=self.r, p=self.p)
+        return base64.urlsafe_b64encode(kdf.derive(password.encode("utf-8")))
 
-SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
-SLACK_SIGNING_SECRET = os.environ.get("SLACK_SIGNING_SECRET")
+    def encrypt_token(self, key, token):
+        salt = os.urandom(SALT_BYTES)
+        key = self.generate_key(key, salt)
+        ciphertext = Fernet(key).encrypt(token.encode("utf-8"))
+        return base64.urlsafe_b64encode(salt + ciphertext)
 
-def get_token(user_id):
-    return decrypted_token.decode('utf-8')
+    def decrypt_token(self, key, encrypted_token):
+        raw = base64.urlsafe_b64decode(encrypted_token)
+        salt, ciphertext = raw[:SALT_BYTES], raw[SALT_BYTES:]
+        key = self.generate_key(key, salt)
+        return Fernet(key).decrypt(ciphertext).decode("utf-8")
 
-app = App(
-    token=SLACK_BOT_TOKEN,
-    signing_secret=SLACK_SIGNING_SECRET
-)
-
-if __name__ == "__main__":
-    bot = SocketModeHandler(app).start()
