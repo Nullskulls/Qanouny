@@ -19,7 +19,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     slack_user_id: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    token: Mapped[str] = mapped_column(String(200), nullable=False)
+    encrypted_token: Mapped[str] = mapped_column(String(200), nullable=False)
     is_admin: Mapped[bool] = mapped_column(default=False)
 
 Base.metadata.create_all(engine)
