@@ -4,6 +4,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
 from views import RenderTemplate
+from auth import Encrypter
 
 load_dotenv()
 
@@ -29,6 +30,8 @@ app = App(
 
 render_template = RenderTemplate(app.client)
 
+encrypter = Encrypter()
+
 @app.command("/wipey")
 def wipe_command(ack, body):
     ack()
@@ -49,7 +52,14 @@ def handle_submit(ack, body):
         body["view"]["state"]["values"]["token_input"]["plain_text_input-action"]["value"]
     )
 
-    print(f"User {user_id} submitted token: {token}")
+    passkey = (
+        body["view"]["state"]["values"]["encryption_key_input"]["encryption-action"]["value"]
+    )
+
+    enc_token = encrypter.encrypt_token(encrypter.generate_key(passkey), token)
+
+    print(f"User {user_id} submitted token: {token}, submitted passkey: {passkey}, encrypted token: {enc_token}")
+
 
 if __name__ == "__main__":
     socket_mode_handler = SocketModeHandler(app=app, app_token=SLACK_APP_TOKEN)

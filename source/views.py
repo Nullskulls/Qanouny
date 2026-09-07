@@ -44,6 +44,18 @@ class RenderTemplate:
                     },
                 },
                 {
+                    "type": "input",
+                    "block_id": "encryption_key_input",
+                    "element": {
+                        "type": "plain_text_input",
+                        "action_id": "encryption-action"
+                    },
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Encryption Key",
+                    },
+                },
+                {
                     "type": "actions",
                     "elements": [
                         {
@@ -52,7 +64,7 @@ class RenderTemplate:
                                 "type": "plain_text",
                                 "text": "Submit Token",
                             },
-                            "value": "click_me_123",
+                            "value": "submit_token",
                             "action_id": "submit_token"
                         }
                     ]
