@@ -29,8 +29,8 @@ class DatabaseMethods:
         self.session = session
 
     def add_user(self, slack_user_id, encrypted_token, is_admin=False):
+        new_user = User(slack_user_id=slack_user_id, encrypted_token=encrypted_token, is_admin=is_admin)
         try:
-            new_user = User(slack_user_id=slack_user_id, encrypted_token=encrypted_token, is_admin=is_admin)
             self.session.add(new_user)
             self.session.commit()
             return new_user
@@ -43,8 +43,7 @@ class DatabaseMethods:
         return self.session.execute(stmt).scalar_one_or_none()
 
     def update_user_token(self, slack_user_id, new_encrypted_token):
-        user = self.get_user(slack_user_id)
-        if not user:
+        if not (user:= self.get_user(slack_user_id)):
             raise ValueError(f"User with Slack ID: {slack_user_id} not found")
 
         user.encrypted_token = new_encrypted_token
@@ -53,8 +52,7 @@ class DatabaseMethods:
 
 
     def delete_user(self, slack_user_id):
-        user = self.get_user(slack_user_id)
-        if not user:
+        if not (user:= self.get_user(slack_user_id)):
             raise ValueError(f"User with Slack ID: {slack_user_id} not found")
 
         self.session.delete(user)
