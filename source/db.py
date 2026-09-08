@@ -44,20 +44,21 @@ class DatabaseMethods:
 
     def update_user_token(self, slack_user_id, new_encrypted_token):
         user = self.get_user(slack_user_id)
-        if user:
-            user.encrypted_token = new_encrypted_token
-            self.session.commit()
-            return user
         if not user:
             raise ValueError(f"User with Slack ID: {slack_user_id} not found")
 
+        user.encrypted_token = new_encrypted_token
+        self.session.commit()
+        return user
+
+
     def delete_user(self, slack_user_id):
         user = self.get_user(slack_user_id)
-        if user:
-            self.session.delete(user)
-            self.session.commit()
         if not user:
             raise ValueError(f"User with Slack ID: {slack_user_id} not found")
+
+        self.session.delete(user)
+        self.session.commit()
 
 
     
