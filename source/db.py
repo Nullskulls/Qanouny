@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from sqlalchemy import String, create_engine, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 load_dotenv()
@@ -23,16 +24,19 @@ class User(Base):
 
 Base.metadata.create_all(engine)
 
-class Methods:
+class DatabaseMethods:
     def __init__(self, session):
         self.session = session
 
     def add_user(self, slack_user_id, encrypted_token, is_admin=False):
-        new_user = User(slack_user_id=slack_user_id, encrypted_token=encrypted_token, is_admin=is_admin)
-        self.session.add(new_user)
-        self.session.commit()
-
-        return new_user
+        try:
+            new_user = User(slack_user_id=slack_user_id, encrypted_token=encrypted_token, is_admin=is_admin)
+            self.session.add(new_user)
+            self.session.commit()
+            return new_user
+        except IntegrityError as e:
+            self.session.rollback()
+            raise ValueError(str(e.orig))
 
     def get_user(self, slack_user_id):
         stmt = select(User).where(User.slack_user_id == slack_user_id)
@@ -43,16 +47,17 @@ class Methods:
         if user:
             user.encrypted_token = new_encrypted_token
             self.session.commit()
-        else:
-            raise ValueError("user not found")
+            return user
+        if not user:
+            raise ValueError(f"User with Slack ID: {slack_user_id} not found")
 
     def delete_user(self, slack_user_id):
         user = self.get_user(slack_user_id)
         if user:
             self.session.delete(user)
             self.session.commit()
-        else:
-            raise ValueError("user not found")
+        if not user:
+            raise ValueError(f"User with Slack ID: {slack_user_id} not found")
 
 
     

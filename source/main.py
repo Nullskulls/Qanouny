@@ -46,8 +46,6 @@ def handle_submit(ack, body):
 
     user_id = body["user"]["id"]
 
-    print(body)
-
     token = (
         body["view"]["state"]["values"]["token_input"]["plain_text_input-action"]["value"]
     )
@@ -56,10 +54,7 @@ def handle_submit(ack, body):
         body["view"]["state"]["values"]["encryption_key_input"]["encryption-action"]["value"]
     )
 
-    enc_token = encrypter.encrypt_token(encrypter.generate_key(passkey), token)
-
-    print(f"User {user_id} submitted token: {token}, submitted passkey: {passkey}, encrypted token: {enc_token}")
-
+    enc_token = encrypter.encrypt_token(passkey, token)
 
 if __name__ == "__main__":
     socket_mode_handler = SocketModeHandler(app=app, app_token=SLACK_APP_TOKEN)
