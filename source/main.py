@@ -38,7 +38,7 @@ def wipe_command(ack, body):
 
 @app.event("app_home_opened")
 def home_tab(client, event, logger):
-    render_template.render_view(event, render_template.render_home_tab())
+    render_template.render_home_tab(user_id=event["user"])
 
 @app.action("submit_token")
 def handle_submit(ack, body):

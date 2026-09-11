@@ -1,0 +1,30 @@
+{
+  "type": "home",
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Welcome to the Wipey Bot where you can easily delete your messages with a single command!"
+      }
+    },
+    {
+      "type": "input",
+      "element": {
+        "type": "plain_text_input",
+        "action_id": "plain_text_input-action"
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "App Token"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*App Manifest*\n```{\n    \"display_information\": {\n        \"name\": \"Wiped\"\n    },\n    \"oauth_config\": {\n        \"scopes\": {\n            \"user\": [\n                \"channels:history\",\n                \"im:history\",\n                \"groups:history\",\n                \"mpim:history\",\n                \"chat:write\"\n            ]\n        },\n        \"pkce_enabled\": false\n    },\n    \"settings\": {\n        \"org_deploy_enabled\": false,\n        \"socket_mode_enabled\": false,\n        \"token_rotation_enabled\": false,\n        \"is_mcp_enabled\": false\n    }\n}```"
+      }
+    }
+  ]
+}

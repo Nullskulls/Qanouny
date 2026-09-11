@@ -1,6 +1,12 @@
 import logging, json
+import db
+from pathlib import Path
+from string import Template
 
-from helpers import get_manifest
+VIEWS_DIR = Path(__file__).parent / "views"
+
+def _escape(value):
+    return json.dumps(str(value))[1:-1]
 
 logger = logging.getLogger(__name__)
 
@@ -8,75 +14,40 @@ class RenderTemplate:
 
     def __init__(self, client):
         self.client = client
-        self.wiped_bot_manifest = get_manifest("wiped")
+        self._cache = {}
 
-    def render_view(self, event, view):
-        print(f"Rendering view for user: {event['user']}")
+
+    def _render_view(self, view, user_id):
+        print(f"Rendering view for user: {user_id}")
         try:
             self.client.views_publish(
-                user_id=event["user"],
+                user_id=user_id,
                 view=view
             )
+            return True
         except Exception as e:
             logger.error(f"Error publishing view: {e}")
+            return False
 
-    def render_home_tab(self):
-        view = {
-            "type": "home",
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "Welcome to the Wipey Bot where you can easily delete your messages with a single command!"
-                    }
-                },
-                {
-                    "type": "input",
-                    "block_id": "token_input",
-                    "element": {
-                        "type": "plain_text_input",
-                        "action_id": "plain_text_input-action"
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "App Token",
-                    },
-                },
-                {
-                    "type": "input",
-                    "block_id": "encryption_key_input",
-                    "element": {
-                        "type": "plain_text_input",
-                        "action_id": "encryption-action"
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "Encryption Key",
-                    },
-                },
-                {
-                    "type": "actions",
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Submit Token",
-                            },
-                            "value": "submit_token",
-                            "action_id": "submit_token"
-                        }
-                    ]
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"*App Manifest*\n```{json.dumps(self.wiped_bot_manifest, indent=4)}```"
-                    }
-                },
-            ]
-        }
-        
-        return view
+    def _get_view(self, surface, view_name, **values):
+        cache_key = (surface, view_name)
+        if cache_key not in self._cache:
+            path = VIEWS_DIR / surface / f"{view_name}.json"
+            self._cache[cache_key] = path.read_text(encoding="utf-8")
+
+        raw = self._cache[cache_key]
+        if values:
+            raw = Template(raw).safe_substitute(
+                {k: _escape(v) for k, v in values.items()}
+            )
+        return json.loads(raw)
+
+
+
+    def render_home_tab(self, user_id):
+        if db.methods.get_user(user_id):
+            view = self._get_view("home", "onboarding") #should be replaced with dashboard when that's created
+        else:
+            view = self._get_view("home", "onboarding")
+
+        return self._render_view(view, user_id)
