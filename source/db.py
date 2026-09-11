@@ -1,12 +1,15 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import String, create_engine, select
+from sqlalchemy import String, Text, create_engine, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 load_dotenv()
 
 DATABASE_URL = os.environ["DATABASE_URL"]
+
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(DATABASE_URL)
 
@@ -19,7 +22,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     slack_user_id: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    encrypted_token: Mapped[str] = mapped_column(String(200), nullable=False)
+    encrypted_token: Mapped[str] = mapped_column(Text, nullable=False)
     is_admin: Mapped[bool] = mapped_column(default=False)
 
 Base.metadata.create_all(engine)
@@ -59,4 +62,5 @@ class DatabaseMethods:
         self.session.commit()
 
 
-    
+SessionLocal = sessionmaker(bind=engine)
+methods = DatabaseMethods(session=SessionLocal())
