@@ -40,6 +40,7 @@ class RenderTemplate:
             raw = Template(raw).safe_substitute(
                 {k: _escape(v) for k, v in values.items()}
             )
+
         return json.loads(raw)
 
 
