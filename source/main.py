@@ -1,4 +1,5 @@
 import os
+import db
 from slack_bolt import App
 # from slack_bolt.oauth.oauth_settings import OAuthSettings
 from slack_bolt.adapter.socket_mode import SocketModeHandler
@@ -33,11 +34,11 @@ render_template = RenderTemplate(app.client)
 encrypter = Encrypter()
 
 @app.command("/wipey")
-def wipe_command(ack, body):
+def wipe_command(ack):
     ack()
 
 @app.event("app_home_opened")
-def home_tab(client, event, logger):
+def home_tab(event):
     render_template.render_home_tab(user_id=event["user"])
 
 @app.action("submit_token")
@@ -54,7 +55,10 @@ def handle_submit(ack, body):
         body["view"]["state"]["values"]["encryption_key_input"]["encryption-action"]["value"]
     )
 
-    enc_token = encrypter.encrypt_token(passkey, token)
+    if db.methods.get_user(user_id):
+       return
+
+    db.methods.add_user(slack_user_id=user_id, encrypted_token=encrypter.encrypt_token(passkey=passkey, token=token), is_admin=False)
 
 if __name__ == "__main__":
     socket_mode_handler = SocketModeHandler(app=app, app_token=SLACK_APP_TOKEN)

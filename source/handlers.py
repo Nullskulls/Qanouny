@@ -1,4 +1,5 @@
 import time
+from views import logger
 from slack_sdk.errors import SlackApiError
 
 class MessageHandler:
@@ -16,5 +17,5 @@ class MessageHandler:
                 time.sleep(retry_after)
                 self.purge_message(user_app, message_ts, channel, thread_ts)
             else:
-                print(f"Error purging message: {e.response['error']}")
+                logger.error(f"Error purging message: {e}")
 

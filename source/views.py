@@ -18,7 +18,7 @@ class RenderTemplate:
 
 
     def _render_view(self, view, user_id):
-        print(f"Rendering view for user: {user_id}")
+        logger.debug(f"Rendering view for {user_id}: {view}")
         try:
             self.client.views_publish(
                 user_id=user_id,
